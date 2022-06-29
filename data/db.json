@@ -11,49 +11,22 @@
   ],
   "bookings": [
     {
-      "room": "room 202",
-      "host": "your mom",
-      "guest": "norman",
-      "date": "jan 8, 2023",
-      "startTime": "11:00am",
-      "endTime": "11:30am",
-      "id": "1"
-    },
-    {
-      "room": "room 203",
-      "host": "your zom",
-      "guest": "jose",
-      "date": "june 28, 2023",
-      "startTime": "09:00am",
-      "endTime": "10:30am",
-      "id": "343"
-    },
-    {
-      "room": "room 202",
-      "host": "your dad",
-      "guest": "wally",
-      "date": "july 8, 2022",
-      "startTime": "2:00pm",
-      "endTime": "3:00pm",
-      "id": "dog"
-    },
-    {
-      "id": "vzPbbW0"
-    },
-    {
-      "id": "-HFXp_V"
-    },
-    {
-      "id": "BDpZsCg"
-    },
-    {
-      "room": "room 202",
-      "host": "fsafsd",
-      "guest": "fasfsdf",
+      "room": "room 201",
+      "host": "Boyd Read",
+      "guest": "Rory   Dunlop",
       "date": 1656432000,
-      "startTime": 31200,
-      "endTime": 34800,
-      "id": "vwgIn4f"
+      "startTime": 61200,
+      "endTime": 64800,
+      "id": "sALs60I"
+    },
+    {
+      "room": "room 201",
+      "host": "Betsy Irwin",
+      "guest": "Milton Chandler",
+      "date": 1656604800,
+      "startTime": 55800,
+      "endTime": 57600,
+      "id": "xXfeZb-"
     }
   ]
 }

@@ -2,8 +2,12 @@ import {
   getUnixTime,
   parseISO,
   format,
+  fromUnixTime,
+  isWithinInterval,
+  secondsToMinutes,
 } from 'date-fns';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import timeToSeconds from '../helper/timeToSeconds';
 
@@ -17,8 +21,10 @@ export default function BookingForm() {
   const [emptyFields, setEmptyFields] = useState(0);
   const [errorCount, setErrorCount] = useState(0);
   const [isPendingSubmit, setIsPendingSubmit] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const todayInUnix = getUnixTime(parseISO(format(new Date(), 'yyyy-MM-dd')));
+  const navigate = useNavigate('');
 
   useEffect(() => {
     const formInitialState = {
@@ -145,24 +151,51 @@ export default function BookingForm() {
     }
   }, [formErrorState]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isSubmitClicked) setIsSubmitClicked(true);
-
     if ((emptyFields === 0) && (errorCount === 0)) {
-      setIsPendingSubmit(true);
-      fetch('http://localhost:8000/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formState,
-          date: formUnixTime.date,
-          startTime: formUnixTime.startTime,
-          endTime: formUnixTime.endTime,
-        }),
-      }).then(() => {
+      try {
+        let message = '';
+        setIsPendingSubmit(true);
+        const response = await fetch('http://localhost:8000/bookings');
+        const updatedBookingList = await response.json();
+        const newListStart = fromUnixTime(formUnixTime.date + formUnixTime.startTime);
+        const newListEnd = fromUnixTime(formUnixTime.date + formUnixTime.endTime);
+
+        updatedBookingList.forEach((list) => {
+          if (list.room === formState.room) {
+            const listStart = fromUnixTime(list.date + list.startTime);
+            const listEnd = fromUnixTime(list.date + list.endTime);
+            if (isWithinInterval(newListStart, { start: listStart, end: listEnd })
+              || isWithinInterval(newListEnd, { start: listStart, end: listEnd })) {
+              message = `${list.room.toUpperCase()} is booked by ${list.host}:
+                ${format(listStart, 'dd/MM/yyyy h:mm:a')}
+                  (${secondsToMinutes(list.endTime - list.startTime)} minutes).
+              `;
+            }
+          }
+        });
+        if (message === '') {
+          await fetch('http://localhost:8000/bookings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...formState,
+              date: formUnixTime.date,
+              startTime: formUnixTime.startTime,
+              endTime: formUnixTime.endTime,
+            }),
+          });
+          navigate('/bookings');
+        } else {
+          throw new Error(message);
+        }
+      } catch (catchError) {
+        setSubmitError(catchError.message);
+      } finally {
         setIsPendingSubmit(false);
-      });
+      }
     }
   };
 
@@ -308,23 +341,22 @@ export default function BookingForm() {
                 {formErrorState.endTime}
               </small>
             )}
-            {!isPendingSubmit && (
+            {!isPendingSubmit ? (
               <button
                 type='submit'
                 className='w-auto shadow-md p-1 rounded-sm block ml-auto
-                text-accent-blue-light hover:text-accent-blue-dark'
+                  text-accent-blue-light hover:text-accent-blue-dark'
               >
                 Submit
               </button>
-            )}
-            {isPendingSubmit && (
+            ) : (
               <button
                 type='submit'
                 className='w-auto shadow-md p-1 rounded-sm block ml-auto
-                text-accent-blue-light hover:text-accent-blue-dark'
+                  text-accent-blue-light hover:text-accent-blue-dark'
                 disabled
               >
-                Adding blog...
+                Booking...
               </button>
             )}
             {isSubmitClicked && (
@@ -336,6 +368,11 @@ export default function BookingForm() {
                 {(emptyFields > 0) && (
                   `${emptyFields} empty ${emptyFields > 1 ? 'fields' : 'field'}`
                 )}
+              </small>
+            )}
+            {submitError && (
+              <small className='text-red-500 text-center block ml-auto mt-2'>
+                {submitError}
               </small>
             )}
           </form>

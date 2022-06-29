@@ -8,6 +8,7 @@ export default function Dashboard() {
       </h2>
       <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
         <Link to='bookings'>View Bookings</Link>
+        <Link to='bookings/new'>New Booking</Link>
         <div className='bg-red-200'>02</div>
         <div className='bg-red-200'>03</div>
         <div className='bg-red-200'>04</div>
